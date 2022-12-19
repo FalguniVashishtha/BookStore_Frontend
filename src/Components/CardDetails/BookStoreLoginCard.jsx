@@ -1,105 +1,49 @@
-import React, { Component } from 'react';
-import Card from '@mui/material/Card';
-import TextField from '@mui/material/TextField';
-import { Button } from '@mui/material';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import Stack from '@mui/material/Stack';
-import { loginUser } from '../Services/BookStoreService';
-import './BookStoreLoginCard.css';
+import axios from 'axios';
+import React, { useState } from 'react';
+import './BookStoreLoginCard.css'
+import { Card } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
 
-class BookStoreLoginCard extends Component {
+export default function BookStoreLoginCard() {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            email: '',
-            password: ''
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
+  const handleLogin = async () => {
+    const loginBuyer = { email: email, password: password }
+    await axios.post('http://localhost:8080/User/login', loginBuyer)
+      .then((response) => {
+        console.log(response.data.obj)
+        if (response.data) {
+          localStorage.setItem("token", response.data.obj)
+          localStorage.setItem("token", response.data.obj)
         }
-    }
+        navigate('/BookList');
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
 
-    handleEmail = (event) => {
-        this.setState({
-            email: event.target.value
-        })
-    }
-
-    handlePassword = (event) => {
-        this.setState({
-            password: event.target.value
-        })
-    }
-
-    handleSubmit = async () => {
-        let data = {
-            email: this.state.email,
-            password: this.state.password,
-        };
-        console.log("pass1");
-        await loginUser(data)
-            .then((res) => {
-                let message = "";
-                if (res.data.statusCode === 200)
-                    message = "Sign in successful"
-                console.log("response" + res.data);
-                // localStorage.setItem('token',res.data.message);
-                // console.log("token----",+localStorage.getItem('token'));
-                this.setState({
-                    SnackbarOpen: true,
-                    SnackbarMessage: message
-                })
-
-            })
-        // await axios.get("http://localhost:8080/login", this.state)
-        //     .then((response) => {
-        //         console.log(response.data)
-        //     })
-        //     .catch((error) => {
-        //         console.log(error)
-        //     });
-        // console.log("Login successfully")
-    }
-
-
-    notifySubmit = () => {
-        toast('Login Done!!');
-    }
-
-    render() {
-        return (
-            <div>
-                <Card className='BookCard'>
-                    <h2 >BookStore</h2><br></br>
-                    <form>
-                        <div>
-                            <label className='name-field'> User Name </label>
-                            <div >
-                                <TextField required className='name-box' variant="outlined" onChange={(event) => this.handleEmail(event)} value={this.state.email} />
-                                <p>{this.state.email}</p>
-                            </div>
-
-
-                            <label className='name-field'> Password </label>
-                            <div >
-                                <TextField required className='name-box' variant="outlined" onChange={(event) => this.handlePassword(event)} value={this.state.password} />
-                                <p>{this.state.password}</p>
-                            </div>
-
-                            <Stack className='submit-reset-button' spacing={3} direction="row">
-                                <Button variant="outlined" onClick={this.notifyCancel}>Cancel</Button>
-                                <ToastContainer />
-                                <Button type="submit" variant="outlined" onClick={this.handleSubmit}>Submit</Button>
-                                <ToastContainer />
-                                <Button variant="outlined">Reset</Button>
-                            </Stack>
-                        </div>
-                        <br />
-
-                    </form>
-                </Card>
-            </div>
-        );
-    }
+  return (
+    <div>
+      <Card className='login-card' style={{ backgroundColor: 'gainsboro' }}>
+        <div>
+          <h1>Login to Book Store</h1>
+          <label className='login-lable'>Email </label>
+          <input className='login-input' type={'email'} placeholder="Enter your email"
+            value={email} onChange={(e) => { setEmail(e.target.value) }} style={{ marginLeft: '34px' }} />
+        </div>
+        <div>
+          <lable className='login-lable'>Password </lable>
+          <input className='login-input' type={'password'} placeholder="Enter your password"
+            value={password} onChange={(e) => { setPassword(e.target.value) }} />
+        </div>
+        <br />
+        <button onClick={handleLogin} style={{ marginLeft: '34px' }}>Login</button>
+        <Link to={'/registerpage'} style={{ marginLeft: '10px' }}>  Don't have an account</Link>
+      </Card>
+    </div>
+  )
 }
-export default BookStoreLoginCard;
